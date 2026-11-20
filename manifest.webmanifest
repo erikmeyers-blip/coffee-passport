@@ -1,0 +1,9 @@
+{
+  "name": "Coffee Passport",
+  "short_name": "Coffee",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#24150E",
+  "theme_color": "#24150E",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
