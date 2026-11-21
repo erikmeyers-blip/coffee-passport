@@ -228,6 +228,7 @@
     UI.prevCups[name] = rating(name).cups || 0;
     UI.prevFav[name] = rating(name).fav || '';
     openPage(shopHTML(s), 'shop');
+    shopSig = sigFor(name);
     settleShop(name);
   }
   function cupClass(on, was) { return on ? (was ? 'full' : 'fill') : (was ? 'drain' : ''); }
@@ -263,8 +264,16 @@
       </div>`;
   }
   const norm = s => (s || '').trim().toLowerCase();
+  // Redraw the shop card only when something on it actually changed. Saving to
+  // the sheet refreshes the data a second or two after a tap; if nothing changed
+  // for this shop, leave the card alone so a pour in progress isn't cut off.
+  let shopSig = '';
+  const sigFor = name => { const r = rating(name); return JSON.stringify([r.cups || 0, r.fav || '', (r.want || []).join('|'), visitsAt(name).length, menuFor(name).length]); };
   function rerenderShop() {
     if (UI.view !== 'shop' || !currentShop) return;
+    const sig = sigFor(currentShop);
+    if (sig === shopSig) return;
+    shopSig = sig;
     const top = pageEl.scrollTop; pageEl.innerHTML = shopHTML(shopBy(currentShop)); pageEl.scrollTop = top;
     settleShop(currentShop);
   }
