@@ -234,10 +234,20 @@
 
   // ---------- Pages ----------
   const pageEl = $('#page');
-  function openPage(html, view) { UI.view = view; pageEl.innerHTML = html; pageEl.hidden = false; pageEl.scrollTop = 0; setNav(); }
-  function closePage() { UI.view = 'map'; pageEl.hidden = true; pageEl.innerHTML = ''; setNav(); renderAll(); }
+  // Screens remember how to reopen the one under them, so Back from a shop
+  // opened in Search returns to Search.
+  let pageReopen = null, trailMode = 'push';
+  const pageTrail = [];
+  function openPage(html, view, reopen) {
+    if (!pageEl.hidden && pageReopen && trailMode === 'push') pageTrail.push(pageReopen);
+    trailMode = 'push'; pageReopen = reopen || null;
+    UI.view = view; pageEl.innerHTML = html; pageEl.hidden = false; pageEl.scrollTop = 0; setNav();
+  }
+  function closePage() { pageTrail.length = 0; pageReopen = null; UI.view = 'map'; pageEl.hidden = true; pageEl.innerHTML = ''; setNav(); renderAll(); }
+  function pageBack() { const f = pageTrail.pop(); if (f) { trailMode = 'none'; f(); } else closePage(); }
+  function openTab(f) { pageTrail.length = 0; trailMode = 'none'; f(); }
   function setNav() { document.querySelectorAll('.navpill button').forEach(b => b.setAttribute('aria-current', b.dataset.go === (UI.view.startsWith('shop') ? 'map' : UI.view) ? 'page' : 'false')); }
-  pageEl.addEventListener('click', e => { if (e.target.closest('[data-back]')) closePage(); });
+  pageEl.addEventListener('click', e => { if (e.target.closest('[data-back]')) pageBack(); });
 
   // Shop card
   let currentShop = null;
@@ -246,7 +256,7 @@
     currentShop = name;
     UI.prevCups[name] = rating(name).cups || 0;
     UI.prevFav[name] = rating(name).fav || '';
-    openPage(shopHTML(s), 'shop');
+    openPage(shopHTML(s), 'shop', () => openShop(name));
     shopSig = sigFor(name);
     settleShop(name);
   }
@@ -423,7 +433,7 @@
   // ---------- Search ----------
   const TYPES = ['Latte', 'Mocha', 'Chai', 'Matcha', 'Cold brew', 'Tea', 'Espresso', 'Seasonal', 'Non-coffee'];
   let sq = { q: '', type: '' };
-  function openSearch() { openPage(searchHTML(), 'search'); bindSearch(); setTimeout(() => { const i = $('#sq'); i && i.focus(); }, 50); }
+  function openSearch() { openPage(searchHTML(), 'search', openSearch); bindSearch(); setTimeout(() => { const i = $('#sq'); i && i.focus(); }, 50); }
   function searchHTML() {
     return `<div class="wrap"><div class="searchtop"><div class="searchfield"><button class="backbtn" style="background:transparent" data-back aria-label="Back to map">${I.back}</button>
       <input id="sq" placeholder="Chai, cold brew, Five Watt…" value="${esc(sq.q)}" autocomplete="off" aria-label="Search drinks or shops"></div>
@@ -461,7 +471,7 @@
   }
 
   // ---------- Passport ----------
-  function openPassport() { openPage(passportHTML(), 'passport'); }
+  function openPassport() { openPage(passportHTML(), 'passport', openPassport); }
   function passportHTML() {
     const bs = recompute(), n = shops().length, earned = bs.list.filter(b => b.earned && !b.hidden).length;
     const seasons = bs.byId.seasons.seasons.map(s => `<div class="season${s.done ? ' done' : ''}">${s.name}<small>${s.current ? 'now' : s.done ? '✓' : ''}</small></div>`).join('');
@@ -498,8 +508,8 @@
   $('#nav').addEventListener('click', e => {
     const b = e.target.closest('[data-go]'); if (!b) return;
     if (b.dataset.go === 'map') closePage();
-    if (b.dataset.go === 'search') openSearch();
-    if (b.dataset.go === 'passport') openPassport();
+    if (b.dataset.go === 'search') openTab(openSearch);
+    if (b.dataset.go === 'passport') openTab(openPassport);
   });
   $('#searchbar').addEventListener('click', openSearch);
   $('#fab').addEventListener('click', () => openCheckin(UI.view === 'shop' ? currentShop : null));
@@ -507,7 +517,37 @@
   $('#zin').addEventListener('click', () => zoomAt(...visMid(), 1.5));
   $('#zout').addEventListener('click', () => zoomAt(...visMid(), 1 / 1.5));
   $('#zall').addEventListener('click', fitAll);
-  addEventListener('keydown', e => { if (e.key === 'Escape') { if (!sheetEl.hidden) closeSheet(); else if (!pageEl.hidden) closePage(); } });
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeTop(); });
+
+  // ---------- Back gesture ----------
+  // Android's back goes back in the page's history, and the app used to have
+  // none, so Back left the app. While anything is open on top of the map
+  // (a celebration, a sheet, a screen, the open drawer) there is one extra
+  // history step; Back uses it to close the top thing, and it's put back if
+  // more is still open. With only the map showing, Back leaves the app.
+  const anyOpen = () => !celEl.hidden || !sheetEl.hidden || !pageEl.hidden || UI.drawerOpen;
+  let guard = false, skipPop = false, syncT = 0;
+  function syncBack() {
+    clearTimeout(syncT);
+    syncT = setTimeout(() => {
+      if (anyOpen() && !guard) { history.pushState({ cp: 1 }, ''); guard = true; }
+      else if (!anyOpen() && guard) { guard = false; skipPop = true; history.back(); }
+    }, 0);
+  }
+  function closeTop() {
+    if (!celEl.hidden) { const b = celEl.querySelector('[data-next]'); if (b) b.click(); else celEl.hidden = true; }
+    else if (!sheetEl.hidden) closeSheet();
+    else if (!pageEl.hidden) pageBack();
+    else if (UI.drawerOpen) setDrawer(false);
+  }
+  addEventListener('popstate', () => {
+    if (skipPop) { skipPop = false; return; }
+    guard = false;
+    closeTop();
+    syncBack();
+  });
+  const watch = new MutationObserver(syncBack);
+  [celEl, sheetEl, pageEl, $('#drawer')].forEach(el => watch.observe(el, { attributes: true, attributeFilter: ['hidden', 'class'] }));
 
   // ---------- Render all ----------
   function renderAll() { recompute(); renderPins(); renderChips(); renderDrawer(); applyView(); }
