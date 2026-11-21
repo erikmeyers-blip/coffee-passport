@@ -64,6 +64,7 @@ home, and everything saved only on that device.
 
 - **Add a shop:** add a row in Shops with *Include?* = Yes, then run
   `geocodeShops` in Apps Script so it gets a map pin.
+- **Bingo squares:** a shop counts for the square its pin is in. For a pin right on a border street, the Neighborhood column decides; you can also type a square's name there (e.g. `Seward East`).
 - **Edit tags or menus:** edit the Shops or Menus tab; the app picks it up on next open.
 - **Her progress:** the Visits and Ratings tabs. Every row has an **Account**
   column; each signed-in Google account only sees its own rows, so testing

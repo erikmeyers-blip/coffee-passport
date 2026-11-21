@@ -114,6 +114,9 @@
       'hiawatha': [3, 5], 'minnehaha': [3, 5], 'morris park': [3, 5]
     }
   };
+  // A square's own name works in the sheet's Neighborhood column too, e.g.
+  // "Seward East" to put a shop on the border into that square.
+  BINGO.names.forEach((row, r) => row.forEach((n, c) => { const k = n.toLowerCase(); if (!BINGO.hoods[k]) BINGO.hoods[k] = [r, c]; }));
   const EDGE = 0.001; // degrees, roughly a block
   function bingoSquare(shop) {
     const hood = BINGO.hoods[(shop.neighborhood || '').trim().toLowerCase()] || null;
