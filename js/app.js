@@ -570,8 +570,9 @@
   }
   // Splash: plays once per launch; tap to skip.
   document.querySelectorAll('.stamp-shape').forEach(p => p.setAttribute('d', SH.cookieBig));
-  const splash = $('#splash'), cups = shops().length;
-  $('#splashCount').textContent = cups ? `${cups} shops to collect. No rush.` : 'Every shop. No rush.';
+  const splash = $('#splash');
+  // No count here: the splash shows before the sheet syncs, so a number would be stale.
+  $('#splashCount').textContent = 'Every shop. No rush.';
   const hideSplash = () => { splash.classList.add('out'); setTimeout(() => { splash.hidden = true; }, 500); };
   splash.addEventListener('click', hideSplash);
   setTimeout(hideSplash, reduceMotion ? 300 : 3400);
