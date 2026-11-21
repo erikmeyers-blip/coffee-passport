@@ -6,7 +6,7 @@
 // this device).
 window.CP_CONFIG = {
   // The Apps Script web app URL, from Deploy > Manage deployments in the sheet.
-  BACKEND_URL: '',
+  BACKEND_URL: 'https://script.google.com/macros/s/AKfycbyT0Qrubh3SNO9R4n_1JqWcQ0XhJMKIw3MQjblTlw-Z-GFrOxQn4oONJm3nHab02qv5/exec',
   // The OAuth client ID from Google Cloud > APIs & Services > Credentials.
   GOOGLE_CLIENT_ID: '733862051742-pa8kr7sp6ktbnoms6mcmjpt4ttdvdj16.apps.googleusercontent.com'
 };
