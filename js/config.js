@@ -8,5 +8,5 @@ window.CP_CONFIG = {
   // The Apps Script web app URL, from Deploy > Manage deployments in the sheet.
   BACKEND_URL: '',
   // The OAuth client ID from Google Cloud > APIs & Services > Credentials.
-  GOOGLE_CLIENT_ID: ''
+  GOOGLE_CLIENT_ID: '733862051742-pa8kr7sp6ktbnoms6mcmjpt4ttdvdj16.apps.googleusercontent.com'
 };
