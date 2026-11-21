@@ -6,12 +6,15 @@
  * "Anyone" only means the URL can be called. Every request must carry a fresh
  * Google sign-in token for an email listed as "Allowed email" in the Settings
  * tab, or it is refused. The sheet itself is never shared.
+ *
+ * Each signed-in account has its own visits and ratings (the Account column),
+ * so a test account never mixes with hers.
  */
 
 const TAB = { shops: 'Shops', menus: 'Menus', visits: 'Visits', ratings: 'Ratings', settings: 'Settings' };
 const TAG_COLUMNS = { 'Good for working': 'working', 'Big tables (students)': 'bigTables', 'Sunny windows': 'sunny', 'Water view': 'water', 'Patio': 'patio', 'Quiet': 'quiet' };
-const VISIT_HEADERS = ['Date', 'Time', 'Shop', 'Cups (1-5)', 'Drink', 'Favorite drink here?', 'How she got there', 'What for', 'Notes'];
-const RATING_HEADERS = ['Shop', 'Cups', 'Favorite drink', 'Want to try', 'Updated'];
+const VISIT_HEADERS = ['Date', 'Time', 'Shop', 'Cups (1-5)', 'Drink', 'Favorite drink here?', 'How she got there', 'What for', 'Notes', 'Account'];
+const RATING_HEADERS = ['Shop', 'Cups', 'Favorite drink', 'Want to try', 'Updated', 'Account'];
 
 // ---------- Entry point ----------
 function doPost(e) {
@@ -23,11 +26,11 @@ function doPost(e) {
   try {
     if (req.action !== 'data') lock.waitLock(10000);
     switch (req.action) {
-      case 'data': return json_(getData_());
-      case 'logVisit': logVisit_(req.visit); return json_({ ok: true });
-      case 'setRating': upsertRating_(req.shop, { cups: req.cups }); return json_({ ok: true });
-      case 'setFavorite': upsertRating_(req.shop, { fav: req.drink || '' }); return json_({ ok: true });
-      case 'setWant': upsertRating_(req.shop, { want: req.want || [] }); return json_({ ok: true });
+      case 'data': return json_(getData_(who.email));
+      case 'logVisit': logVisit_(req.visit, who.email); return json_({ ok: true });
+      case 'setRating': upsertRating_(req.shop, { cups: req.cups }, who.email); return json_({ ok: true });
+      case 'setFavorite': upsertRating_(req.shop, { fav: req.drink || '' }, who.email); return json_({ ok: true });
+      case 'setWant': upsertRating_(req.shop, { want: req.want || [] }, who.email); return json_({ ok: true });
       default: return json_({ error: 'Unknown action' });
     }
   } catch (err) {
@@ -74,7 +77,8 @@ function settings_() {
 }
 
 // ---------- Reads ----------
-function getData_() {
+function getData_(email) {
+  const mine = function (r) { return String(r['Account'] || '').toLowerCase() === email; };
   const shopsSheet = sheet_(TAB.shops);
   const values = shopsSheet.getDataRange().getValues();
   const head = values[0].map(String), col = function (n) { return head.indexOf(n); };
@@ -93,13 +97,13 @@ function getData_() {
 
   const tz = Session.getScriptTimeZone();
   const fmt = function (v, pattern) { return v instanceof Date ? Utilities.formatDate(v, tz, pattern) : String(v || ''); };
-  const visits = rows_(TAB.visits).filter(function (r) { return r['Shop']; }).map(function (r) {
+  const visits = rows_(TAB.visits).filter(function (r) { return r['Shop'] && mine(r); }).map(function (r) {
     return { date: fmt(r['Date'], 'yyyy-MM-dd'), time: fmt(r['Time'], 'HH:mm'), shop: r['Shop'], drink: r['Drink'] || '', how: r['How she got there'] || '', purpose: r['What for'] || '' };
   });
 
   const ratings = {};
   rows_(TAB.ratings).forEach(function (r) {
-    if (!r['Shop']) return;
+    if (!r['Shop'] || !mine(r)) return;
     ratings[r['Shop']] = { cups: Number(r['Cups']) || 0, fav: r['Favorite drink'] || '', want: String(r['Want to try'] || '').split(' | ').filter(String) };
   });
 
@@ -109,34 +113,38 @@ function getData_() {
 }
 
 // ---------- Writes ----------
-function logVisit_(v) {
+function logVisit_(v, email) {
   if (!v || !v.shop) throw new Error('Missing visit');
   const sh = ensureTab_(TAB.visits, VISIT_HEADERS);
-  const fav = ratingRow_(v.shop);
-  sh.appendRow(["'" + v.date, "'" + v.time, v.shop, fav ? fav.cups : '', v.drink || '', fav && v.drink && fav.fav === v.drink ? 'Yes' : '', v.how || '', v.purpose || '', '']);
+  const fav = ratingRow_(v.shop, email);
+  const row = { 'Date': "'" + v.date, 'Time': "'" + v.time, 'Shop': v.shop, 'Cups (1-5)': fav ? fav.cups : '', 'Drink': v.drink || '',
+    'Favorite drink here?': fav && v.drink && fav.fav === v.drink ? 'Yes' : '', 'How she got there': v.how || '', 'What for': v.purpose || '', 'Notes': '', 'Account': email };
+  const head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String);
+  sh.appendRow(head.map(function (h) { return row[h] !== undefined ? row[h] : ''; }));
 }
-function ratingRow_(shop) {
-  const r = rows_(TAB.ratings).filter(function (x) { return x['Shop'] === shop; })[0];
+function ratingRow_(shop, email) {
+  const r = rows_(TAB.ratings).filter(function (x) { return x['Shop'] === shop && String(x['Account'] || '').toLowerCase() === email; })[0];
   return r ? { cups: r['Cups'], fav: r['Favorite drink'] } : null;
 }
-function upsertRating_(shop, patch) {
+function upsertRating_(shop, patch, email) {
   if (!shop) throw new Error('Missing shop');
   const sh = ensureTab_(TAB.ratings, RATING_HEADERS);
   const vals = sh.getDataRange().getValues();
   let row = -1;
-  for (let i = 1; i < vals.length; i++) if (vals[i][0] === shop) { row = i + 1; break; }
-  const cur = row > 0 ? vals[row - 1] : [shop, '', '', '', ''];
+  for (let i = 1; i < vals.length; i++) if (vals[i][0] === shop && String(vals[i][5] || '').toLowerCase() === email) { row = i + 1; break; }
+  const cur = row > 0 ? vals[row - 1].slice(0, 6) : [shop, '', '', '', '', email];
+  while (cur.length < 6) cur.push('');
   if (patch.cups !== undefined) cur[1] = patch.cups || '';
   if (patch.fav !== undefined) cur[2] = patch.fav;
   if (patch.want !== undefined) cur[3] = patch.want.join(' | ');
-  cur[4] = new Date();
-  if (row > 0) sh.getRange(row, 1, 1, 5).setValues([cur]); else sh.appendRow(cur);
+  cur[4] = new Date(); cur[5] = email;
+  if (row > 0) sh.getRange(row, 1, 1, 6).setValues([cur]); else sh.appendRow(cur);
 }
 
 // ---------- Setup (run by hand from the editor) ----------
 function setup() {
-  ensureTab_(TAB.visits, VISIT_HEADERS);
-  ensureTab_(TAB.ratings, RATING_HEADERS);
+  addMissingHeaders_(ensureTab_(TAB.visits, VISIT_HEADERS), VISIT_HEADERS);
+  addMissingHeaders_(ensureTab_(TAB.ratings, RATING_HEADERS), RATING_HEADERS);
   const settings = sheet_(TAB.settings);
   const have = settings.getDataRange().getValues().map(function (r) { return String(r[0]).trim().toLowerCase(); });
   if (have.indexOf('google client id') < 0) settings.appendRow(['Google client ID', '', 'From Google Cloud > Credentials. Not secret.']);
@@ -190,6 +198,10 @@ function ensureTab_(name, headers) {
   if (!sh) { sh = ss.insertSheet(name); sh.appendRow(headers); sh.setFrozenRows(1); }
   else if (sh.getLastRow() === 0) sh.appendRow(headers);
   return sh;
+}
+function addMissingHeaders_(sh, headers) {
+  const have = sh.getRange(1, 1, 1, Math.max(1, sh.getLastColumn())).getValues()[0].map(String);
+  headers.forEach(function (h) { if (have.indexOf(h) < 0) { have.push(h); sh.getRange(1, have.length).setValue(h); } });
 }
 function rows_(name) {
   const sh = SpreadsheetApp.getActive().getSheetByName(name);

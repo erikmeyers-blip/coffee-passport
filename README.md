@@ -65,7 +65,10 @@ home, and everything saved only on that device.
 - **Add a shop:** add a row in Shops with *Include?* = Yes, then run
   `geocodeShops` in Apps Script so it gets a map pin.
 - **Edit tags or menus:** edit the Shops or Menus tab; the app picks it up on next open.
-- **Her progress:** the Visits and Ratings tabs.
+- **Her progress:** the Visits and Ratings tabs. Every row has an **Account**
+  column; each signed-in Google account only sees its own rows, so testing
+  with your account never touches her passport. Filter by Account to see just hers,
+  and delete your test rows whenever you like.
 - **After changing `Code.gs`:** Deploy > Manage deployments > edit > *New version*.
 
 ## Files

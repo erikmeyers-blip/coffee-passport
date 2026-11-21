@@ -35,8 +35,10 @@
   function onCredential(resp) {
     const p = decodeJwt(resp.credential);
     if (!p) return;
+    const switching = token && token.email !== p.email;
     token = { id: resp.credential, exp: p.exp, email: p.email, name: p.given_name || p.name || '' };
     ls.set(KEY + '_token', token);
+    if (switching || (data.owner && data.owner !== p.email)) { data = blank(); queue = []; persist(); emit('data'); }
     emit('auth');
     sync();
   }
@@ -75,7 +77,7 @@
         queue.shift(); persist();
       }
       const fresh = await call('data');
-      data = Object.assign(blank(), fresh, { loadedAt: Date.now() });
+      data = Object.assign(blank(), fresh, { loadedAt: Date.now(), owner: token.email });
       // Re-apply anything still queued (none here, but keeps local view right).
       persist(); setStatus('saved'); emit('data');
     } catch (e) {
@@ -100,6 +102,7 @@
 
   function signOut() {
     token = null; ls.del(KEY + '_token');
+    data = blank(); queue = []; persist();
     if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
     emit('auth');
   }
