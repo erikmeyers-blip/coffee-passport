@@ -79,8 +79,10 @@
   }
 
   // Bingo: 4 rows (I-94 to Lake St, Lake to 38th, 38th to 46th, 46th to Hwy 62)
-  // by 6 columns (France to the river). Each shop counts for the square of its
-  // neighborhood from the sheet; unknown neighborhoods fall back to position.
+  // by 6 columns (France to the river). Each shop counts for the square its
+  // pin sits in, so what you see on the map is what counts. Pins right on a
+  // boundary street (within about a block) go to the square of their
+  // neighborhood from the sheet, when that square is the one next door.
   const BINGO = {
     rows: [[44.9655, 44.948], [44.948, 44.934], [44.934, 44.920], [44.920, 44.8915]],
     cols: [[-93.329, -93.308], [-93.308, -93.2885], [-93.2885, -93.2623], [-93.2623, -93.2475], [-93.2475, -93.2326], [-93.2326, -93.197]],
@@ -107,12 +109,18 @@
       'hiawatha': [3, 5], 'minnehaha': [3, 5], 'morris park': [3, 5]
     }
   };
+  const EDGE = 0.001; // degrees, roughly a block
   function bingoSquare(shop) {
-    const k = (shop.neighborhood || '').trim().toLowerCase();
-    if (BINGO.hoods[k]) return BINGO.hoods[k];
+    const hood = BINGO.hoods[(shop.neighborhood || '').trim().toLowerCase()] || null;
+    const has = typeof shop.lat === 'number' && typeof shop.lng === 'number' && !isNaN(shop.lat) && !isNaN(shop.lng);
+    if (!has) return hood;
     const r = BINGO.rows.findIndex(([n, s]) => shop.lat <= n && shop.lat > s);
     const c = BINGO.cols.findIndex(([w, e]) => shop.lng >= w && shop.lng < e);
-    return r < 0 || c < 0 ? null : [r, c];
+    const pos = r < 0 || c < 0 ? null : [r, c];
+    if (!hood || (pos && pos[0] === hood[0] && pos[1] === hood[1])) return pos || hood;
+    const [n, s] = BINGO.rows[hood[0]], [w, e] = BINGO.cols[hood[1]];
+    const nearHood = shop.lat <= n + EDGE && shop.lat > s - EDGE && shop.lng >= w - EDGE && shop.lng < e + EDGE;
+    return nearHood || !pos ? hood : pos;
   }
   function bingoCellRect(r, c) {
     const [n, s] = BINGO.rows[r], [w, e] = BINGO.cols[c];

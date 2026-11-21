@@ -70,6 +70,7 @@ home, and everything saved only on that device.
   with your account never touches her passport. Filter by Account to see just hers,
   and delete your test rows whenever you like.
 - **After changing `Code.gs`:** Deploy > Manage deployments > edit > *New version*.
+- **After changing CSS or JS:** bump the `?v=` number on the `<link>` and `<script>` tags in `index.html`, so phones load the new files instead of cached ones.
 
 ## Files
 
