@@ -6,7 +6,7 @@
   // Shapes are Material 3 Expressive-style polygons: [lobes, depth].
   const DEFS = [
     { id: 'explorer', name: 'Explorer', glyph: 'E', shape: [9, 0.07], color: '#6F3F1E', rule: 'Try new shops. Levels at 5, 10 and 25.', levels: [5, 10, 25] },
-    { id: 'corners', name: 'Four Corners', glyph: '4', shape: [4, 0.2], color: '#E8A21B', rule: 'Visit the shop in each corner of the map.' },
+    { id: 'corners', name: 'Four Corners', glyph: '4', shape: [4, 0.2], color: '#E8A21B', rule: 'Stamp the four corner squares of the Bingo card.' },
     { id: 'bingo', name: 'Bingo', glyph: 'B', shape: [12, 0.05], color: '#E8742A', rule: 'Fill a row or column of squares from edge to edge.' },
     { id: 'blackout', name: 'Blackout Bingo', glyph: '■', shape: [16, 0.04], color: '#3B2A21', rule: 'A stamp in every square that has a shop.' },
     { id: 'farafield', name: 'Far Afield', glyph: 'mi', shape: [3, 0.12], color: '#A0582A', rule: 'Your farthest shop from home. Levels at 1, 2 and 3 miles.', levels: [1, 2, 3] },
@@ -46,7 +46,11 @@
     for (let r = 0; r < R; r++) rows.push(lineDone(cells.filter(c => c.r === r)));
     for (let c = 0; c < C; c++) cols.push(lineDone(cells.filter(x => x.c === c)));
     const playable = cells.filter(c => !c.free);
-    return { cells, rows, cols, lines: rows.filter(Boolean).length + cols.filter(Boolean).length, stamped: playable.filter(c => c.stamped).length, playable: playable.length, blackout: playable.every(c => c.stamped) };
+    // Four Corners is the classic bingo pattern: the card's corner squares.
+    // A corner with no shop is a free square, as on a real card.
+    const corners = [[0, 0], [0, C - 1], [R - 1, 0], [R - 1, C - 1]].map(([r, c]) => cells[r * C + c]);
+    corners.forEach(c => { c.corner = true; });
+    return { cells, rows, cols, corners, lines: rows.filter(Boolean).length + cols.filter(Boolean).length, stamped: playable.filter(c => c.stamped).length, playable: playable.length, blackout: playable.every(c => c.stamped) };
   }
 
   function compute(state) {
@@ -54,7 +58,6 @@
     const shops = state.shops, visits = state.visits || [], ratings = state.ratings || {};
     const byName = Object.fromEntries(shops.map(s => [s.name, s]));
     const visited = new Set(visits.map(v => v.shop).filter(n => byName[n]));
-    const corners = geo.corners(shops);
     const bingo = bingoState(shops, visited);
     const out = {};
     const lvl = (def, have) => {
@@ -68,9 +71,8 @@
     set('explorer', Object.assign(lvl(DEFS[0], visited.size), {}));
     out.explorer.progress = `${visited.size} ${visited.size === 1 ? 'shop' : 'shops'}` + (out.explorer.maxed ? '' : ` · next level at ${out.explorer.need}`);
 
-    const cornerNames = Object.values(corners);
-    const cornersDone = cornerNames.filter(n => visited.has(n)).length;
-    set('corners', { have: cornersDone, need: 4, earned: cornersDone === 4, progress: `${cornersDone} of 4 corners`, corners });
+    const cornerSq = bingo.corners.filter(c => !c.free), cornersDone = cornerSq.filter(c => c.stamped).length;
+    set('corners', { have: cornersDone, need: cornerSq.length || 4, earned: cornerSq.length > 0 && cornersDone === cornerSq.length, progress: `${cornersDone} of ${cornerSq.length} corner squares` });
 
     set('bingo', { have: bingo.lines, need: 1, earned: bingo.lines > 0, progress: bingo.lines ? `${bingo.lines} ${bingo.lines === 1 ? 'line' : 'lines'} done` : `${bingo.stamped} of ${bingo.playable} squares` });
     set('blackout', { have: bingo.stamped, need: bingo.playable, earned: bingo.blackout, progress: `${bingo.stamped} of ${bingo.playable} squares` });
@@ -125,7 +127,7 @@
     set('full', { have: visited.size, need: shops.length, earned: shops.length > 0 && visited.size === shops.length, progress: `${visited.size} of ${shops.length} shops` });
 
     const list = DEFS.map(d => out[d.id]);
-    return { list, byId: out, visited, corners, bingo };
+    return { list, byId: out, visited, bingo };
   }
 
   // Which stamps (or levels) a new visit just earned.

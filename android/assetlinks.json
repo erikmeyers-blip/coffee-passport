@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.erikmeyers.coffeepassport",
+    "sha256_cert_fingerprints": ["B2:D7:B1:B5:38:69:13:CF:7A:37:03:FE:48:2D:B5:61:8D:AF:D3:36:0F:EE:C0:9C:23:AA:66:57:CB:39:6E:F9"]
+  }
+}]

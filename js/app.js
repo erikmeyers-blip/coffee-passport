@@ -61,7 +61,7 @@
   const recompute = () => { badgeState = B.compute(D()); return badgeState; };
 
   // ---------- UI state ----------
-  const UI = { filters: new Set(), bingo: false, corners: true, names: false, drawerOpen: false, view: 'map', prevCups: {}, prevFav: {} };
+  const UI = { filters: new Set(), bingo: false, names: false, drawerOpen: false, view: 'map', prevCups: {}, prevFav: {} };
   const V = { z: 0.8, tx: 0, ty: 0 };
 
   // ---------- Map ----------
@@ -73,12 +73,31 @@
   mapEl.appendChild(layer);
   $('#labels', layer).innerHTML = G.mapLabels().map(l => `<span class="map-label ${l.cls}" style="left:${l.x.toFixed(0)}px;top:${l.y.toFixed(0)}px">${esc(l.t)}</span>`).join('');
 
+  // The part of the screen the map can actually be seen in: below the search
+  // bar and chips, above the peeking shop drawer. Everything is laid out
+  // against this window, not the whole screen.
+  let VIS = null;
+  function measureVis() {
+    const top = $('.topbar').getBoundingClientRect().bottom + 6;
+    const peek = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--drawer-peek')) || 250;
+    const bottom = Math.max(top + 120, innerHeight - peek);
+    VIS = { l: 0, t: top, r: innerWidth, b: bottom, w: innerWidth, h: bottom - top };
+    return VIS;
+  }
+  const vis = () => VIS || measureVis();
+  // Smallest zoom shows the whole map; the starting zoom fills the window.
+  const minZ = () => { const v = vis(); return Math.min(v.w / G.W, v.h / G.H); };
+  const fillZ = () => { const v = vis(); return Math.max(v.w / G.W, v.h / G.H); };
+  function clampAxis(t, size, lo, len) {
+    // Smaller than the window: keep it centered. Bigger: its edges can't come
+    // inside the window, so dragging stops at the map's edge on every side.
+    return size <= len ? lo + (len - size) / 2 : Math.min(lo, Math.max(lo + len - size, t));
+  }
   function clampView() {
-    const w = innerWidth, h = innerHeight;
-    V.z = Math.max(Math.min(w / G.W, h / G.H) * 0.9, Math.min(3.2, V.z));
-    const mw = G.W * V.z, mh = G.H * V.z;
-    V.tx = mw < w ? (w - mw) / 2 : Math.min(60, Math.max(w - mw - 60, V.tx));
-    V.ty = mh < h ? (h - mh) / 2 : Math.min(220, Math.max(h - mh - 260, V.ty));
+    const v = vis();
+    V.z = Math.max(minZ(), Math.min(3.2, V.z));
+    V.tx = clampAxis(V.tx, G.W * V.z, v.l, v.w);
+    V.ty = clampAxis(V.ty, G.H * V.z, v.t, v.h);
   }
   function applyView() {
     clampView();
@@ -88,14 +107,15 @@
   }
   function zoomAt(px, py, factor) {
     const mx = (px - V.tx) / V.z, my = (py - V.ty) / V.z;
-    V.z = Math.max(0.3, Math.min(3.2, V.z * factor));
+    V.z = Math.max(minZ(), Math.min(3.2, V.z * factor));
     V.tx = px - mx * V.z; V.ty = py - my * V.z; applyView();
   }
   function centerOn(lat, lng, z) {
-    if (z) V.z = z;
-    V.tx = innerWidth / 2 - G.X(lng) * V.z; V.ty = innerHeight * 0.4 - G.Y(lat) * V.z; applyView();
+    if (z) V.z = Math.max(minZ(), Math.min(3.2, z));
+    const v = vis();
+    V.tx = v.l + v.w / 2 - G.X(lng) * V.z; V.ty = v.t + v.h / 2 - G.Y(lat) * V.z; applyView();
   }
-  function fitAll() { V.z = Math.min(innerWidth / G.W, (innerHeight - 260) / G.H); V.tx = (innerWidth - G.W * V.z) / 2; V.ty = 150; applyView(); }
+  function fitAll() { V.z = minZ(); V.tx = 0; V.ty = 0; applyView(); }
 
   // Drag, pinch and wheel.
   const ptrs = new Map(); let drag = null, pinch = null, moved = false;
@@ -115,7 +135,7 @@
       moved = true;
       const [a, b] = [...ptrs.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
       const mx = (pinch.mx - pinch.tx) / pinch.z, my = (pinch.my - pinch.ty) / pinch.z;
-      V.z = Math.max(0.3, Math.min(3.2, pinch.z * d / Math.max(1, pinch.d)));
+      V.z = Math.max(minZ(), Math.min(3.2, pinch.z * d / Math.max(1, pinch.d)));
       V.tx = (a[0] + b[0]) / 2 - mx * V.z; V.ty = (a[1] + b[1]) / 2 - my * V.z; applyView();
     }
   });
@@ -127,22 +147,21 @@
     const pin = e.target.closest('.pin');
     if (pin) openShop(pin.dataset.shop);
   });
-  addEventListener('resize', applyView);
+  addEventListener('resize', () => { measureVis(); applyView(); });
 
   function matchesFilters(s) { for (const f of UI.filters) if (!s.tags[f]) return false; return true; }
 
   function renderPins() {
-    const bs = badgeState, cornersMap = bs.corners, cornerNames = Object.values(cornersMap);
+    const bs = badgeState;
     $('#pins', layer).innerHTML = shops().map(s => {
-      const v = bs.visited.has(s.name), r = rating(s.name).cups, corner = UI.corners && cornerNames.includes(s.name);
+      const v = bs.visited.has(s.name), r = rating(s.name).cups;
       const top = v && r === 5;
       const d = v ? (top ? SH.flower : SH.cookie) : SH.circle;
       const fill = v ? (top ? 'var(--orange)' : 'var(--primary)') : 'var(--bg)', stroke = v ? 'var(--bg)' : 'var(--primary)';
       const dim = UI.filters.size && !matchesFilters(s) ? ' dim' : '';
-      return `<button class="pin${corner ? ' corner' : ''}${dim}" data-shop="${esc(s.name)}" style="left:${G.X(s.lng).toFixed(1)}px;top:${G.Y(s.lat).toFixed(1)}px" aria-label="${esc(s.name)}${v ? ', stamped' : ''}">
+      return `<button class="pin${dim}" data-shop="${esc(s.name)}" style="left:${G.X(s.lng).toFixed(1)}px;top:${G.Y(s.lat).toFixed(1)}px" aria-label="${esc(s.name)}${v ? ', stamped' : ''}">
         <svg width="32" height="32" viewBox="0 0 44 44"><path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="3.5"/></svg>
         <span class="pin-num"${top ? ' style="color:var(--on-orange)"' : ''}>${v ? (r || '✓') : ''}</span>
-        ${corner ? I.flag(v ? '#E8A21B' : '#FFF8F4', v ? '#3B2A21' : '#E8742A') : ''}
         <span class="pin-name">${esc(shortName(s.name))}</span></button>`;
     }).join('');
     const h = D().home;
@@ -157,7 +176,7 @@
     const bg = badgeState.bingo, out = [];
     bg.cells.forEach(c => {
       const r = G.bingoCellRect(c.r, c.c);
-      out.push(`<div class="bingo-cell ${c.free ? 'free' : c.stamped ? 'stamped' : ''}" style="left:${(r.x + 3).toFixed(0)}px;top:${(r.y + 3).toFixed(0)}px;width:${(r.w - 6).toFixed(0)}px;height:${(r.h - 6).toFixed(0)}px"><span>${esc(G.BINGO.names[c.r][c.c])}</span><span class="mark">${c.free ? 'FREE' : c.stamped ? '✓' : c.shops.length}</span></div>`);
+      out.push(`<div class="bingo-cell ${c.free ? 'free' : c.stamped ? 'stamped' : ''}${c.corner ? ' corner' : ''}" style="left:${(r.x + 3).toFixed(0)}px;top:${(r.y + 3).toFixed(0)}px;width:${(r.w - 6).toFixed(0)}px;height:${(r.h - 6).toFixed(0)}px"><span>${c.corner ? I.flag(c.stamped ? '#E8A21B' : '#FFF8F4', c.stamped ? '#3B2A21' : '#E8742A').replace('class="flag"', 'class="cflag"') : ''}${esc(G.BINGO.names[c.r][c.c])}</span><span class="mark">${c.free ? 'FREE' : c.stamped ? '✓' : c.shops.length}</span></div>`);
     });
     bg.rows.forEach((done, r) => { if (done) { const a = G.bingoCellRect(r, 0), z = G.bingoCellRect(r, 5); out.push(`<div class="bingo-line" style="left:${a.x}px;top:${a.y}px;width:${z.x + z.w - a.x}px;height:${a.h}px"></div>`); } });
     bg.cols.forEach((done, c) => { if (done) { const a = G.bingoCellRect(0, c), z = G.bingoCellRect(3, c); out.push(`<div class="bingo-line" style="left:${a.x}px;top:${a.y}px;width:${a.w}px;height:${z.y + z.h - a.y}px"></div>`); } });
@@ -168,14 +187,12 @@
   function renderChips() {
     const bs = badgeState;
     const chips = [
-      `<button class="chip" aria-pressed="${UI.corners}" data-chip="corners">${I.flag('#E8A21B', 'currentColor').replace('class="flag"', 'width="14" height="16" style="margin-top:2px"')}Four Corners ${bs.byId.corners.have}/4</button>`,
       `<button class="chip accent" aria-pressed="${UI.bingo}" data-chip="bingo">Bingo${bs.bingo.lines ? ' · ' + bs.bingo.lines : ''}</button>`
     ].concat(TAGS.map(([k, label]) => `<button class="chip" aria-pressed="${UI.filters.has(k)}" data-filter="${k}">${label}</button>`));
     $('#chips').innerHTML = chips.join('');
   }
   $('#chips').addEventListener('click', e => {
     const c = e.target.closest('button'); if (!c) return;
-    if (c.dataset.chip === 'corners') UI.corners = !UI.corners;
     if (c.dataset.chip === 'bingo') { UI.bingo = !UI.bingo; if (UI.bingo) fitAll(); }
     if (c.dataset.filter) { const f = c.dataset.filter; UI.filters.has(f) ? UI.filters.delete(f) : UI.filters.add(f); setDrawer(UI.filters.size > 0); }
     renderAll();
@@ -484,8 +501,9 @@
   });
   $('#searchbar').addEventListener('click', openSearch);
   $('#fab').addEventListener('click', () => openCheckin(UI.view === 'shop' ? currentShop : null));
-  $('#zin').addEventListener('click', () => zoomAt(innerWidth / 2, innerHeight * 0.4, 1.5));
-  $('#zout').addEventListener('click', () => zoomAt(innerWidth / 2, innerHeight * 0.4, 1 / 1.5));
+  const visMid = () => { const v = vis(); return [v.l + v.w / 2, v.t + v.h / 2]; };
+  $('#zin').addEventListener('click', () => zoomAt(...visMid(), 1.5));
+  $('#zout').addEventListener('click', () => zoomAt(...visMid(), 1 / 1.5));
   $('#zall').addEventListener('click', fitAll);
   addEventListener('keydown', e => { if (e.key === 'Escape') { if (!sheetEl.hidden) closeSheet(); else if (!pageEl.hidden) closePage(); } });
 
@@ -503,7 +521,8 @@
   // ---------- Start ----------
   function start() {
     renderAll();
-    const h = D().home; if (h) centerOn(h.lat, h.lng, 0.8); else { V.z = 0.8; centerOn(44.93, -93.26, 0.8); }
+    measureVis();
+    const h = D().home; if (h) centerOn(h.lat, h.lng, fillZ()); else centerOn(44.93, -93.26, fillZ());
     if (S.needsSignIn()) { $('#signin').hidden = false; S.renderSignIn($('#gbtn')); }
     S.sync();
   }

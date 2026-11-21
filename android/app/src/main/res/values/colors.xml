@@ -1,0 +1,4 @@
+<resources>
+    <!-- Matches theme_color in manifest.webmanifest. -->
+    <color name="roast">#24150E</color>
+</resources>

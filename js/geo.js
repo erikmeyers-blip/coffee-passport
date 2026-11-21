@@ -1,5 +1,5 @@
-// Map geometry: the hand-drawn South Minneapolis map, Bingo squares,
-// Four Corners and distances. Bounds: I-94 (north), France Ave (west),
+// Map geometry: the hand-drawn South Minneapolis map, Bingo squares
+// and distances. Bounds: I-94 (north), France Ave (west),
 // Hwy 62 (south), Mississippi River (east). Drawn at true proportions.
 (function () {
   const LN = 44.968, LS = 44.886, WW = -93.333, EE = -93.195;
@@ -119,13 +119,6 @@
     return { x: X(w), y: Y(n), w: X(e) - X(w), h: Y(s) - Y(n) };
   }
 
-  function corners(shops) {
-    if (!shops.length) return {};
-    const nl = s => (s.lat - LS) / (LN - LS), ng = s => (s.lng - WW) / (EE - WW);
-    const pick = fn => shops.reduce((b, s) => fn(s) > fn(b) ? s : b, shops[0]);
-    return { nw: pick(s => nl(s) - ng(s)).name, ne: pick(s => nl(s) + ng(s)).name, sw: pick(s => -nl(s) - ng(s)).name, se: pick(s => -nl(s) + ng(s)).name };
-  }
-
   function miles(a, b) {
     if (!a || !b) return null;
     const R = 3958.8, rad = d => d * Math.PI / 180;
@@ -134,5 +127,5 @@
     return 2 * R * Math.asin(Math.sqrt(h));
   }
 
-  window.CP_GEO = { W, H, X, Y, mapSVG, mapLabels, BINGO, bingoSquare, bingoCellRect, corners, miles };
+  window.CP_GEO = { W, H, X, Y, mapSVG, mapLabels, BINGO, bingoSquare, bingoCellRect, miles };
 })();
