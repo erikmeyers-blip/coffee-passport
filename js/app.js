@@ -560,6 +560,27 @@
     if (what === 'auth') { $('#signin').hidden = !S.needsSignIn(); }
   });
 
+  // ---------- Updates ----------
+  // GitHub Pages lets the phone keep index.html for 10 minutes, so right
+  // after an update the app can open the old version. Ask for the live page
+  // and, if it names a newer version, reload once with that version in the
+  // address (which skips the cached copy).
+  (function checkForUpdate() {
+    const tag = document.querySelector('script[src*="js/app.js"]');
+    const mine = tag && (tag.getAttribute('src').match(/[?&]v=(\d+)/) || [])[1];
+    if (!mine || !window.fetch) return;
+    fetch(location.pathname + '?check=' + Date.now(), { cache: 'no-store' })
+      .then(r => r.ok ? r.text() : '')
+      .then(t => {
+        const live = (t.match(/js\/app\.js\?v=(\d+)/) || [])[1];
+        if (!live || live === mine) return;
+        const key = 'cp-reloaded-' + live;
+        try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (e) { /* ignore */ }
+        location.replace(location.pathname + '?v=' + live);
+      })
+      .catch(() => {});
+  })();
+
   // ---------- Start ----------
   function start() {
     renderAll();
