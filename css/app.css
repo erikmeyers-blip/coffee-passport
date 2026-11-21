@@ -55,10 +55,10 @@ button { cursor: pointer; }
 .pin .flag { position: absolute; left: 18px; top: -24px; width: 26px; height: 30px; overflow: visible; pointer-events: none; }
 .pin.dim { opacity: .28; }
 .home-pin { position: absolute; width: 34px; height: 34px; border-radius: 11px; background: var(--deep); display: grid; place-items: center; transform: translate(-50%, -50%) scale(var(--inv, 1)); box-shadow: var(--shadow); pointer-events: none; }
-.bingo-cell { position: absolute; border-radius: 12px; border: 3px dashed #C9A88F; background: rgba(255,248,244,.08); padding: 8px 10px; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; font-weight: 900; font-size: 18px; color: #5A3A26; }
+.bingo-cell { position: absolute; border-radius: 12px; border: 3px dashed #C9A88F; background: rgba(255,248,244,.08); padding: 8px 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; line-height: 1.1; pointer-events: none; font-weight: 900; font-size: 18px; color: #5A3A26; }
 .bingo-cell.free { border-style: dotted; border-color: var(--outline-2); background: color-mix(in srgb, var(--bg) 55%, transparent); }
 .bingo-cell.stamped { border-style: solid; border-color: var(--primary); background: color-mix(in srgb, var(--primary) 40%, transparent); color: #FFF8F4; }
-.bingo-cell .mark { align-self: flex-end; }
+.bingo-cell .mark { position: absolute; right: 10px; bottom: 6px; }
 .bingo-cell.corner { border-color: #E8A21B; }
 .bingo-cell .cflag { width: 18px; height: 21px; vertical-align: -3px; margin-right: 5px; overflow: visible; }
 .bingo-line { position: absolute; border: 6px solid var(--orange); border-radius: 16px; box-shadow: 0 0 0 8px rgba(232,116,42,.25); pointer-events: none; }

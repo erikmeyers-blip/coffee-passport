@@ -30,39 +30,44 @@
     return smooth(pts, true);
   }
   const stLat = n => 44.9485 - (n - 30) * 0.00181;
+  // The city keeps going past the passport border, so there's always map
+  // around the edges instead of blank space. PAD is that extra, in map units.
+  const PAD = 320, L0 = -PAD, R0 = W + PAD, T0 = -PAD, B0 = H + PAD;
 
   function mapSVG() {
     const out = [];
     out.push('<rect x="-3000" y="-3000" width="7000" height="7000" fill="var(--map-land)"/>');
     let minor = '', major = '';
-    for (let n = 18; n <= 64; n++) {
-      const y = f(Y(stLat(n)));
-      const line = `<line x1="-50" x2="${W + 50}" y1="${y}" y2="${y}"/>`;
+    for (let n = 0; n <= 100; n++) {
+      const yy = Y(stLat(n)); if (yy < T0 || yy > B0) continue;
+      const y = f(yy);
+      const line = `<line x1="${L0}" x2="${R0}" y1="${y}" y2="${y}"/>`;
       if (n % 8 === 6 || n === 30) major += line; else minor += line;
     }
-    for (let g = WW + 0.004; g < EE; g += 0.0045) minor += `<line y1="-50" y2="${H + 50}" x1="${f(X(g))}" x2="${f(X(g))}"/>`;
+    for (let g = WW + 0.004 - 0.0045 * 10; X(g) < R0; g += 0.0045) if (X(g) > L0) minor += `<line y1="${T0}" y2="${B0}" x1="${f(X(g))}" x2="${f(X(g))}"/>`;
     const avenues = [['France', -93.329], ['Penn', -93.3085], ['Hennepin', -93.2984], ['Lyndale', -93.2883], ['Nicollet', -93.2777], ['Chicago', -93.2623], ['Cedar', -93.2475], ['28th Ave', -93.2326], ['34th Ave', -93.221]];
-    avenues.forEach(([, g]) => { major += `<line y1="-50" y2="${H + 50}" x1="${f(X(g))}" x2="${f(X(g))}"/>`; });
+    avenues.forEach(([, g]) => { major += `<line y1="${T0}" y2="${B0}" x1="${f(X(g))}" x2="${f(X(g))}"/>`; });
     out.push(`<g stroke="var(--map-street)" stroke-width="2" vector-effect="non-scaling-stroke">${minor}</g>`);
     out.push(`<g stroke="var(--map-major)" stroke-width="5">${major}</g>`);
-    out.push(`<path d="M${f(X(-93.2440))},${f(Y(44.963))} L${f(X(-93.2337))},${f(Y(44.9413))} L${f(X(-93.2056))},${f(Y(44.886))}" stroke="var(--map-major)" stroke-width="10" fill="none" stroke-linecap="round"/>`);
-    out.push(`<path d="M${f(X(-93.2717))},-20 L${f(X(-93.2717))},${f(Y(44.92))} L${f(X(-93.2840))},${H + 20}" stroke="var(--map-hwy)" stroke-width="8" fill="none" stroke-dasharray="18 10"/>`);
+    out.push(`<path d="M${f(X(-93.2616))},${f(Y(45.000))} L${f(X(-93.2440))},${f(Y(44.963))} L${f(X(-93.2337))},${f(Y(44.9413))} L${f(X(-93.2056))},${f(Y(44.886))} L${f(X(-93.1873))},${f(Y(44.850))}" stroke="var(--map-major)" stroke-width="10" fill="none" stroke-linecap="round"/>`);
+    const w35 = (y) => X(-93.2717) + (X(-93.2840) - X(-93.2717)) * (y - Y(44.92)) / (H + 20 - Y(44.92));
+    out.push(`<path d="M${f(X(-93.2717))},${T0} L${f(X(-93.2717))},${f(Y(44.92))} L${f(w35(B0))},${B0}" stroke="var(--map-hwy)" stroke-width="8" fill="none" stroke-dasharray="18 10"/>`);
     const parks = [[44.946, -93.3105, 0.0105, 0.0080, 1], [44.9215, -93.3060, 0.0085, 0.0080, 3], [44.9085, -93.2420, 0.0080, 0.0088, 4], [44.9205, -93.2365, 0.0040, 0.0050, 5], [44.9396, -93.2590, 0.0030, 0.0040, 7], [44.9150, -93.2115, 0.0030, 0.0055, 8]];
     parks.forEach(p => out.push(`<path d="${blob(...p)}" fill="var(--map-park)"/>`));
     const creek = smooth([[44.9080, -93.3290], [44.9120, -93.3200], [44.9155, -93.3040], [44.9130, -93.2960], [44.9120, -93.2850], [44.9140, -93.2700], [44.9160, -93.2560], [44.9175, -93.2470], [44.9198, -93.2400], [44.9205, -93.2330], [44.9175, -93.2225], [44.9158, -93.2125], [44.9145, -93.2010]].map(P), false);
     out.push(`<path d="${creek}" stroke="var(--map-water)" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
     const lakes = [[44.946, -93.3105, 0.0085, 0.0062, 1], [44.9575, -93.3045, 0.0045, 0.0035, 2], [44.9215, -93.3060, 0.0068, 0.0062, 3], [44.9085, -93.2420, 0.0062, 0.0068, 4], [44.9205, -93.2365, 0.0026, 0.0034, 5], [44.9035, -93.2720, 0.0022, 0.0030, 6], [44.9396, -93.2590, 0.0012, 0.0020, 7]];
     lakes.forEach(p => out.push(`<path d="${blob(...p)}" fill="var(--map-water)"/>`));
-    const bank = [[44.970, -93.2290], [44.962, -93.2255], [44.955, -93.2150], [44.948, -93.2055], [44.935, -93.2005], [44.920, -93.2008], [44.905, -93.1985], [44.880, -93.1960]].map(P);
-    out.push(`<path d="${smooth(bank, false)} L${W + 60},${H + 60} L${W + 60},-60 Z" fill="var(--map-water)"/>`);
+    const bank = [[45.002, -93.2350], [44.970, -93.2290], [44.962, -93.2255], [44.955, -93.2150], [44.948, -93.2055], [44.935, -93.2005], [44.920, -93.2008], [44.905, -93.1985], [44.880, -93.1960], [44.850, -93.1900]].map(P);
+    out.push(`<path d="${smooth(bank, false)} L${R0 + 60},${B0 + 60} L${R0 + 60},${T0 - 60} Z" fill="var(--map-water)"/>`);
     // Outside the passport area, shaded; dashed border; I-94 and Hwy 62.
     const fx = X(-93.3290), n94 = Y(44.9655), s62 = Y(44.8915);
     const inner = `M${f(fx)},${f(n94)} H${f(X(-93.2290))} L${f(X(-93.2255))},${f(Y(44.962))} L${f(X(-93.2150))},${f(Y(44.955))} L${f(X(-93.2055))},${f(Y(44.948))} L${f(X(-93.2005))},${f(Y(44.935))} L${f(X(-93.2008))},${f(Y(44.920))} L${f(X(-93.1985))},${f(Y(44.905))} L${f(X(-93.1975))},${f(s62)} H${f(fx)} Z`;
     out.push(`<path d="M-3000,-3000 H4000 V4000 H-3000 Z ${inner}" fill="var(--map-outside)" fill-rule="evenodd"/>`);
     out.push(`<path d="M${f(fx)},${f(n94)} H${f(X(-93.2290))} M${f(X(-93.1975))},${f(s62)} H${f(fx)} V${f(n94)}" fill="none" stroke="var(--map-border)" stroke-width="4" stroke-dasharray="14 9"/>`);
-    out.push(`<path d="M-60,${f(n94 - 10)} H${f(X(-93.226))}" stroke="var(--map-hwy)" stroke-width="12" fill="none"/>`);
-    out.push(`<path d="M-60,${f(s62 + 10)} H${W + 60}" stroke="var(--map-hwy)" stroke-width="12" fill="none"/>`);
-    return `<svg class="map-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${out.join('')}</svg>`;
+    out.push(`<path d="M${L0},${f(n94 - 10)} H${f(X(-93.226))}" stroke="var(--map-hwy)" stroke-width="12" fill="none"/>`);
+    out.push(`<path d="M${L0},${f(s62 + 10)} H${R0}" stroke="var(--map-hwy)" stroke-width="12" fill="none"/>`);
+    return `<svg class="map-svg" width="${W + 2 * PAD}" height="${H + 2 * PAD}" viewBox="${L0} ${T0} ${W + 2 * PAD} ${H + 2 * PAD}" style="position:absolute;left:${L0}px;top:${T0}px" aria-hidden="true">${out.join('')}</svg>`;
   }
 
   function mapLabels() {
@@ -135,5 +140,5 @@
     return 2 * R * Math.asin(Math.sqrt(h));
   }
 
-  window.CP_GEO = { W, H, X, Y, mapSVG, mapLabels, BINGO, bingoSquare, bingoCellRect, miles };
+  window.CP_GEO = { W, H, PAD, X, Y, mapSVG, mapLabels, BINGO, bingoSquare, bingoCellRect, miles };
 })();

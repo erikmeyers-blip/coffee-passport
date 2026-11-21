@@ -96,8 +96,10 @@
   function clampView() {
     const v = vis();
     V.z = Math.max(minZ(), Math.min(3.2, V.z));
-    V.tx = clampAxis(V.tx, G.W * V.z, v.l, v.w);
-    V.ty = clampAxis(V.ty, G.H * V.z, v.t, v.h);
+    // Panning runs to the edge of the drawn city around the passport area.
+    const p = G.PAD * V.z;
+    V.tx = clampAxis(V.tx - p, (G.W + 2 * G.PAD) * V.z, v.l, v.w) + p;
+    V.ty = clampAxis(V.ty - p, (G.H + 2 * G.PAD) * V.z, v.t, v.h) + p;
   }
   function applyView() {
     clampView();
@@ -115,7 +117,7 @@
     const v = vis();
     V.tx = v.l + v.w / 2 - G.X(lng) * V.z; V.ty = v.t + v.h / 2 - G.Y(lat) * V.z; applyView();
   }
-  function fitAll() { V.z = minZ(); V.tx = 0; V.ty = 0; applyView(); }
+  function fitAll() { const v = vis(); V.z = minZ(); V.tx = v.l + (v.w - G.W * V.z) / 2; V.ty = v.t + (v.h - G.H * V.z) / 2; applyView(); }
 
   // Drag, pinch and wheel.
   const ptrs = new Map(); let drag = null, pinch = null, moved = false;
