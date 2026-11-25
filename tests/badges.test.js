@@ -204,6 +204,22 @@ test('Regular is earned with 5 visits to the same shop', () => {
   assert.equal(r.progress, 'A: 5 of 5 visits');
 });
 
+// Decided 2026-11-25: visits to a shop later removed from the list (closed,
+// Include? = No) still count for visit-based stamps, because she really went.
+test('visits to a shop removed from the list still count toward Regular', () => {
+  const list = [shopIn('A', 0, 0)];
+  const r = run(list, Array.from({ length: 5 }, () => visit('Closed Cafe'))).byId.regular;
+  assert.equal(r.earned, true);
+});
+
+test('visits to a shop removed from the list still count toward Early Bird and Four Seasons', () => {
+  const list = [shopIn('A', 0, 0)];
+  const vs = [visit('Closed Cafe', '2026-01-10', '07:30'), visit('Closed Cafe', '2026-04-10'), visit('Closed Cafe', '2026-07-10'), visit('Closed Cafe', '2026-10-10')];
+  const bs = run(list, vs).byId;
+  assert.equal(bs.early.earned, true);
+  assert.equal(bs.seasons.earned, true);
+});
+
 test('Regular is not earned with 4 visits to one shop and 1 to another', () => {
   const list = [shopIn('A', 0, 0), shopIn('B', 1, 1)];
   const vs = [visit('A'), visit('A'), visit('A'), visit('A'), visit('B')];
