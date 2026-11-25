@@ -1,0 +1,576 @@
+[
+ {
+  "name": "Nokomis Beach Coffee",
+  "neighborhood": "Keewaydin",
+  "lat": 44.9128121,
+  "lng": -93.2325657,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": true,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Crema Coffee + Cream",
+  "neighborhood": "Keewaydin",
+  "lat": 44.9121122,
+  "lng": -93.2226427,
+  "tags": {
+   "working": false,
+   "bigTables": false,
+   "sunny": false,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "SunBean Coffee",
+  "neighborhood": "Ericsson",
+  "lat": 44.9199773,
+  "lng": -93.2226931,
+  "tags": {
+   "working": false,
+   "bigTables": false,
+   "sunny": false,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Rick's Coffee Bar",
+  "neighborhood": "Morris Park",
+  "lat": 44.9052418,
+  "lng": -93.211649,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Falls Coffee",
+  "neighborhood": "Hiawatha",
+  "lat": 44.9168904,
+  "lng": -93.2147914,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": true,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Red Coral Coffee",
+  "neighborhood": "Hiawatha",
+  "lat": 44.9217124,
+  "lng": -93.212437,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Code Blu Coffee",
+  "neighborhood": "Seward East",
+  "lat": 44.9630169,
+  "lng": -93.233466,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Sovereign Grounds",
+  "neighborhood": "Field",
+  "lat": 44.9159482,
+  "lng": -93.2622228,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": false
+  }
+ },
+ {
+  "name": "Duck Duck Coffee",
+  "neighborhood": "Powderhorn Park",
+  "lat": 44.9342584,
+  "lng": -93.2469967,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Ducks on Lake",
+  "neighborhood": "Cooper",
+  "lat": 44.948579,
+  "lng": -93.2167541,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": false,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Sisters' Sludge Coffee Cafe & Wine Bar",
+  "neighborhood": "Corcoran",
+  "lat": 44.9342221,
+  "lng": -93.2390632,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Northern Coffeeworks",
+  "neighborhood": "Ericsson",
+  "lat": 44.9265329,
+  "lng": -93.2324974,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": false
+  }
+ },
+ {
+  "name": "Bichota Coffee",
+  "neighborhood": "Central",
+  "lat": 44.9346865,
+  "lng": -93.2628024,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Wildflyer Coffee",
+  "neighborhood": "Longfellow",
+  "lat": 44.9430824,
+  "lng": -93.2307763,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Dogwood Coffee",
+  "neighborhood": "Cooper",
+  "lat": 44.9481695,
+  "lng": -93.2143652,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": false,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Pow Wow Grounds",
+  "neighborhood": "Ventura Village",
+  "lat": 44.9629242,
+  "lng": -93.2544313,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": false
+  }
+ },
+ {
+  "name": "Black Bean Coffee",
+  "neighborhood": "Midtown Phillips",
+  "lat": 44.9506427,
+  "lng": -93.2629767,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": false
+  }
+ },
+ {
+  "name": "Five Watt Coffee",
+  "neighborhood": "Kingfield",
+  "lat": 44.9344808,
+  "lng": -93.2776571,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Silverbird Coffee & More",
+  "neighborhood": "Kingfield",
+  "lat": 44.9256786,
+  "lng": -93.2776767,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Shortwave Coffee",
+  "neighborhood": "Lynnhurst",
+  "lat": 44.9124897,
+  "lng": -93.2906028,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Jones Coffee (Linden Hills)",
+  "neighborhood": "Linden Hills",
+  "lat": 44.9248507,
+  "lng": -93.3153131,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Jones Coffee (Fulton)",
+  "neighborhood": "Fulton",
+  "lat": 44.9120783,
+  "lng": -93.3190818,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Càphin",
+  "neighborhood": "Linden Hills",
+  "lat": 44.9212565,
+  "lng": -93.3286019,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": false,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Cafe Ceres (Linden Hills)",
+  "neighborhood": "Linden Hills",
+  "lat": 44.9229562,
+  "lng": -93.3244469,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Spyhouse Coffee (Whittier)",
+  "neighborhood": "Whittier",
+  "lat": 44.9574615,
+  "lng": -93.2776149,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Spyhouse Coffee (Uptown)",
+  "neighborhood": "Lowry Hill East",
+  "lat": 44.9589334,
+  "lng": -93.2945877,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "SK Coffee",
+  "neighborhood": "Whittier",
+  "lat": 44.9589854,
+  "lng": -93.2877382,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Muhim's Café",
+  "neighborhood": "Whittier",
+  "lat": 44.9481279,
+  "lng": -93.2759391,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Isles Bun & Coffee",
+  "neighborhood": "Lowry Hill East",
+  "lat": 44.9522587,
+  "lng": -93.2986696,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Corner Coffee (Uptown)",
+  "neighborhood": "Lowry Hill East",
+  "lat": 44.952132,
+  "lng": -93.297697,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": false,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Uncommon Grounds",
+  "neighborhood": "East Isles",
+  "lat": 44.9515339,
+  "lng": -93.2979159,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": false,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Moona Moono",
+  "neighborhood": "CARAG",
+  "lat": 44.9467731,
+  "lng": -93.2984556,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Mosaic Coffee",
+  "neighborhood": "CARAG",
+  "lat": 44.9469041,
+  "lng": -93.2985699,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": false
+  }
+ },
+ {
+  "name": "Bob's Java Hut",
+  "neighborhood": "Lowry Hill East",
+  "lat": 44.95387,
+  "lng": -93.287774,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Lake and Bryant Cafe",
+  "neighborhood": "Lyndale",
+  "lat": 44.948188,
+  "lng": -93.290465,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Boiler Room Coffee",
+  "neighborhood": "Stevens Square",
+  "lat": 44.9644405,
+  "lng": -93.2729428,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": false,
+   "water": false,
+   "patio": false,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Fireroast Coffee & Wine Bar",
+  "neighborhood": "Howe",
+  "lat": 44.9340859,
+  "lng": -93.2193761,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Rustica",
+  "neighborhood": "Cedar-Isles-Dean",
+  "lat": 44.9494487,
+  "lng": -93.3202615,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Loons Coffee",
+  "neighborhood": "Cooper",
+  "lat": 44.9485923,
+  "lng": -93.2061682,
+  "tags": {
+   "working": true,
+   "bigTables": true,
+   "sunny": true,
+   "water": true,
+   "patio": true,
+   "quiet": true
+  }
+ },
+ {
+  "name": "Rebecca's Bakery and Cafe",
+  "neighborhood": "Seward",
+  "lat": 44.962619,
+  "lng": -93.2401943,
+  "tags": {
+   "working": false,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": false,
+   "quiet": false
+  }
+ },
+ {
+  "name": "TheCornerCafe@50th",
+  "neighborhood": "Fulton",
+  "lat": 44.9126311,
+  "lng": -93.3282435,
+  "tags": {
+   "working": true,
+   "bigTables": false,
+   "sunny": true,
+   "water": false,
+   "patio": true,
+   "quiet": false
+  }
+ }
+]

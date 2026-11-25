@@ -1,0 +1,6 @@
+{
+  "name": "Coffee Passport",
+  "command": "npm test --silent",
+  "minor": ["android/*", "backend/*", "css/*", "index.html", "*.png", "*.svg", "*.webmanifest"],
+  "timeout": 120
+}
